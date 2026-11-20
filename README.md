@@ -20,7 +20,7 @@ The included day, papers, authors, links, and notes are instructional placeholde
 | --- | --- | --- |
 | Timeline | One card per day: Paper / Takeaways pairs, then one Outputs section | `content/*.md` |
 | Read papers | A reading-date timeline with titles, authors, publication dates, and links | Collected from each day's Paper sections |
-| Notes | A dated timeline of detailed daily pages, independent notes, and outputs | `content/*.md` and `notes/*.md` |
+| Notes | A dated timeline of standalone notes | `notes/*.md` |
 | Knowledges | A dated timeline of reusable concept explanations | `knowledge/*.md` |
 
 Switch views with the top buttons. Search applies to the current view. Files in `templates/` are blank starting points and are not published.
@@ -62,7 +62,6 @@ Notes and Knowledges group pages with the same `date` into one timeline card, ne
 | --- | --- |
 | A knowledge page | `[keyword](knowledge/template-concept)` |
 | A detailed note | `[Research notes](notes/2026-11-20-template-paper-b)` |
-| A daily detail page | `[Learning day](notes/2026-11-20-template)` |
 | An external source | `[Paper](https://example.com/paper)` |
 
 Create the target file before linking to it. Internal links use `knowledge/` or `notes/` without `.html`, `../`, or a local preview address. They work from every view and detail page. External links open in a new tab.

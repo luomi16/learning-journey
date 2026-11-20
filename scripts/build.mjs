@@ -1,4 +1,7 @@
 import { createHash } from 'node:crypto';
+import MarkdownIt from 'markdown-it';
+import hljs from 'highlight.js/lib/core';
+import python from 'highlight.js/lib/languages/python';
 import { readdir, readFile, mkdir, copyFile, writeFile, unlink } from 'node:fs/promises';
 const escape = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 async function load(directory) {
@@ -29,10 +32,33 @@ function validDate(value) {
 for (const document of [...notes, ...concepts]) {
     if (document.date && !validDate(document.date)) throw new Error(`${document.source}: date must be a valid YYYY-MM-DD date, or omitted`);
 }
-const noteDocuments = [...entries, ...notes];
-if (new Set(noteDocuments.map(document => document.slug)).size !== noteDocuments.length) throw new Error('Duplicate note filename in content/ and notes/');
-const targets = new Set([...noteDocuments.map(e => `notes/${e.slug}`), ...concepts.map(e => `knowledge/${e.slug}`)]);
-function inline(text, prefix = '.') {
+// Daily entries stay on the Timeline. Only files in notes/ create standalone Notes pages.
+const targets = new Set([...notes.map(note => `notes/${note.slug}`), ...concepts.map(e => `knowledge/${e.slug}`)]);
+hljs.registerLanguage('python', python);
+const markdown = new MarkdownIt({
+    highlight(code, language) {
+        if (!['python', 'py', 'python3'].includes(language.toLowerCase())) return '';
+        return hljs.highlight(code, { language: 'python' }).value;
+    }
+});
+markdown.renderer.rules.link_open = (tokens, index, options, env, renderer) => {
+    const link = tokens[index];
+    const href = link.attrGet('href');
+    const [target, fragment] = href.split('#', 2);
+    const page = target.replace(/\.md$/, '');
+    if (/^(notes|knowledge)\//.test(page) && !page.endsWith('.html')) {
+        if (!targets.has(page)) throw new Error(`Unknown internal link: ${href}`);
+        link.attrSet('href', `../${page}.html${fragment ? '#' + fragment : ''}`);
+    }
+    if (/^https?:\/\//.test(href)) {
+        link.attrSet('target', '_blank');
+        link.attrSet('rel', 'noopener noreferrer');
+    }
+    return renderer.renderToken(tokens, index, options);
+};
+markdown.renderer.rules.table_open = () => '<div class="markdown-table" tabindex="0" role="region" aria-label="Table"><table>';
+markdown.renderer.rules.table_close = () => '</table></div>\n';
+function inline(text, prefix = '.', labelLinkedPages = false) {
     // Treat code as literal text so instructional link examples do not become links.
     return escape(text).replace(/`([^`]+)`|\[([^\]]+)\]\(([^\s)]+)\)|\*\*([^*]+)\*\*/g, (_, code, label, escapedUrl, bold) => {
         if (code !== undefined) return `<code>${code}</code>`;
@@ -40,14 +66,15 @@ function inline(text, prefix = '.') {
         if (/^https?:\/\//.test(escapedUrl)) return `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer">${label}</a>`;
         const [target, fragment] = escapedUrl.replace(/\.md(?=#|$)/, '').split('#');
         if (!targets.has(target)) throw new Error(`Unknown internal link: ${escapedUrl}`);
-        return `<a href="${prefix}/${target}.html${fragment ? `#${fragment}` : ''}">${label}</a>`;
+        const tag = target.startsWith('notes/') ? 'Note' : target.startsWith('knowledge/') ? 'Knowledge' : '';
+        return `<a href="${prefix}/${target}.html${fragment ? `#${fragment}` : ''}">${label}</a>${labelLinkedPages && tag ? `<span class="output-tag">${tag}</span>` : ''}`;
     });
 }
-function blocks(text, prefix) {
+function blocks(text, prefix, labelLinkedPages = false) {
     return text.trim().split(/\n\s*\n/).filter(Boolean).map(block => {
         const lines = block.split('\n');
-        if (lines.every(line => /^- /.test(line))) return `<ul>${lines.map(line => `<li>${inline(line.slice(2), prefix)}</li>`).join('')}</ul>`;
-        return `<p>${inline(block, prefix).replace(/\n/g, '<br>')}</p>`;
+        if (lines.every(line => /^- /.test(line))) return `<ul>${lines.map(line => `<li>${inline(line.slice(2), prefix, labelLinkedPages)}</li>`).join('')}</ul>`;
+        return `<p>${inline(block, prefix, labelLinkedPages).replace(/\n/g, '<br>')}</p>`;
     }).join('');
 }
 function sections(body) {
@@ -83,7 +110,7 @@ for (const entry of entries) {
             if (!currentPaper) throw new Error(`${entry.source}: put a Paper section before its Takeaways`);
             currentPaper.takeaways += blocks(section.body, '.');
         } else if (/^outputs?$/i.test(section.title)) {
-            entry.outputs += blocks(section.body, '.');
+            entry.outputs += blocks(section.body, '.', true);
         }
     }
     if (!entry.papers.length && entry.paper) entry.papers.push({ title: entry.paperTitle || entry.title, url: entry.paper, authors: entry.authors || '', published: entry.published || '', links: [{ label: 'Paper', url: entry.paper }], takeaways: '' });
@@ -104,15 +131,12 @@ const days = [...grouped].map(([date, documents]) => {
     const tags = [...new Set(documents.map(document => document.tag).filter(Boolean))];
     const title = documents.find(document => document.dayTitle)?.dayTitle || documents.find(document => document.papers.length > 1)?.title || (documents.length === 1 ? documents[0].title : 'A day of learning');
     const papers = documents.flatMap(document => document.papers);
-    let outputs = documents.map(document => document.outputs).join('');
-    if (!outputs.includes('href="./notes/')) {
-        outputs += documents.map(document => `<p><a href="./notes/${document.slug}.html">${documents.length === 1 ? 'Research notes &amp; ideas →' : `${escape(document.title)} · notes →`}</a></p>`).join('');
-    }
+    const outputs = documents.map(document => document.outputs).join('');
     return { date, title, categories, tag: tags.join(' · '), papers, outputs };
 });
 await mkdir('dist', { recursive: true });
 for (const file of ['index.html', 'style.css', 'app.js']) await copyFile(file, `dist/${file}`);
-for (const [directory, documents] of [['notes', noteDocuments], ['knowledge', concepts]]) {
+for (const [directory, documents] of [['notes', notes], ['knowledge', concepts]]) {
     await mkdir(`dist/${directory}`, { recursive: true });
     // Removed source notes must not survive in the published output.
     const activePages = new Set(documents.map(document => `${document.slug}.html`));
@@ -120,7 +144,7 @@ for (const [directory, documents] of [['notes', noteDocuments], ['knowledge', co
         if (file.endsWith('.html') && !activePages.has(file)) await unlink(`dist/${directory}/${file}`);
     }
     for (const document of documents) {
-        const content = sections(document.body).map(s => `<section><h2>${escape(s.title)}</h2>${blocks(s.body, '..')}</section>`).join('');
+        const content = `<div class="markdown-body">${markdown.render(document.body)}</div>`;
         await writeFile(`dist/${directory}/${document.slug}.html`, `<!doctype html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escape(document.title)} · Notes</title><link rel="stylesheet" href="../style.css"><script defer src="../app.js"></script></head>
 <body><div class="shell"><header class="topbar"><a class="brand" href="../index.html">← Learning journal</a><button id="theme" aria-label="Switch color theme">☼</button></header><main class="reading-note">${document.date ? `<p class="note-date">${escape(document.date)}</p>` : ''}<h1>${escape(document.title)}<span class="heading-decoration" aria-hidden="true">୨୧</span></h1>${document.paper ? `<a class="paper-link" href="${escape(document.paper)}" target="_blank" rel="noopener noreferrer">Read paper ↗</a>` : ''}${content}</main></div></body></html>`);
@@ -151,7 +175,7 @@ function documentSummary(document, directory) {
 const sortDocuments = (a, b) => b.date.localeCompare(a.date) || a.title.localeCompare(b.title);
 const library = {
     papers: [...paperIndex.values()].map(paper => ({ ...paper, readDates: paper.readDates.sort().reverse() })),
-    notes: noteDocuments.map(document => documentSummary(document, 'notes')).sort(sortDocuments),
+    notes: notes.map(document => documentSummary(document, 'notes')).sort(sortDocuments),
     knowledge: concepts.map(document => documentSummary(document, 'knowledge')).sort(sortDocuments)
 };
 await writeFile('dist/library.json', JSON.stringify(library));
@@ -172,7 +196,7 @@ const appAsset = await fingerprint('app.js', appSource);
 const styleAsset = await fingerprint('style.css', await readFile('style.css', 'utf8'));
 // Keep the previous URLs working for tabs that still have an older HTML page.
 await writeFile('dist/app.js', appSource);
-const pages = ['dist/index.html', ...noteDocuments.map(document => `dist/notes/${document.slug}.html`), ...concepts.map(document => `dist/knowledge/${document.slug}.html`)];
+const pages = ['dist/index.html', ...notes.map(document => `dist/notes/${document.slug}.html`), ...concepts.map(document => `dist/knowledge/${document.slug}.html`)];
 for (const page of pages) {
     const html = (await readFile(page, 'utf8'))
         .replace(/(href=["'](?:\.\/|\.\.\/))style\.css(["'])/g, `$1${styleAsset}$2`)

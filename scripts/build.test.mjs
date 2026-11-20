@@ -35,7 +35,7 @@ test('root and nested pages share content-addressed CSS, JS and data', async t =
         const content = await readFile(join(directory, 'dist', filename));
         assert(filename.includes(createHash('sha256').update(content).digest('hex').slice(0, 12)));
     }
-    for (const filename of ['index.html', 'notes/day.html', 'notes/detail.html', 'knowledge/concept.html']) {
+    for (const filename of ['index.html', 'notes/detail.html', 'knowledge/concept.html']) {
         const html = await readFile(join(directory, 'dist', filename), 'utf8');
         const prefix = filename.includes('/') ? '../' : './';
         assert(html.includes(`href="${prefix}${versions.style}"`));

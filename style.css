@@ -211,6 +211,7 @@ nav a:hover { color: var(--accent); }
 .section a { color: var(--accent); text-decoration: underline; text-decoration-color: var(--pink); text-underline-offset: 4px; text-decoration-thickness: 1px; overflow-wrap: anywhere; }
 .section a:hover { text-decoration-color: var(--accent); }
 .section code { background: var(--soft); padding: 2px 5px; border-radius: 3px; }
+.output-tag { display: inline-block; margin-left: 8px; padding: 1px 7px; border-radius: 999px; background: var(--pink); color: var(--accent); font-size: 10px; font-weight: 600; letter-spacing: .3px; line-height: 1.5; vertical-align: middle; }
 .card-foot { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); margin-top: 26px; padding: 13px 0; font-size: 11px; color: var(--muted); }
 .card-foot>span:last-child { font-size: 20px; color: var(--accent); }
 .empty { padding: 50px 20px; text-align: center; border: 1px dashed var(--border); border-radius: 10px; color: var(--muted); }
@@ -226,6 +227,38 @@ footer { border-top: 1px solid var(--border); padding: 25px 0 32px; font-size: 1
 .reading-note ul { padding-left: 22px; }
 .reading-note li+li { margin-top: 8px; }
 .reading-note section a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.markdown-body { margin-top: 26px; color: var(--body-text); overflow-wrap: anywhere; }
+.markdown-body :is(h2, h3, h4, h5, h6) { margin-top: 1.6em; color: var(--text); }
+.markdown-body > :first-child { margin-top: 0; }
+.markdown-body :is(p, ul, ol) { line-height: 1.65; }
+.markdown-body :is(ul, ol) { padding-inline-start: 1.5em; }
+.markdown-body a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.markdown-body code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .9em; }
+.markdown-body :not(pre) > code { background: var(--soft); border-radius: 4px; padding: .12em .32em; }
+.markdown-body pre { overflow-x: auto; background: var(--stone); border: 1px solid var(--border); border-radius: 10px; padding: 16px; line-height: 1.55; tab-size: 4; }
+.markdown-body pre code { white-space: pre; overflow-wrap: normal; }
+/* Python tokens are rendered at build time, with colors for both themes. */
+.markdown-body pre { color: var(--text); }
+.markdown-body pre .hljs-keyword { color: #91436b; }
+.markdown-body pre :is(.hljs-title, .hljs-built_in) { color: #365e9c; }
+.markdown-body pre :is(.hljs-string, .hljs-doctag) { color: #32694f; }
+.markdown-body pre :is(.hljs-number, .hljs-literal) { color: #92501f; }
+.markdown-body pre .hljs-comment { color: #6f6b65; font-style: italic; }
+.markdown-body pre :is(.hljs-meta, .hljs-subst) { color: #77519a; }
+[data-theme=dark] .markdown-body pre .hljs-keyword { color: #f1a7cb; }
+[data-theme=dark] .markdown-body pre :is(.hljs-title, .hljs-built_in) { color: #a3c7ff; }
+[data-theme=dark] .markdown-body pre :is(.hljs-string, .hljs-doctag) { color: #a5d6af; }
+[data-theme=dark] .markdown-body pre :is(.hljs-number, .hljs-literal) { color: #efbe91; }
+[data-theme=dark] .markdown-body pre .hljs-comment { color: #b6aaa1; }
+[data-theme=dark] .markdown-body pre :is(.hljs-meta, .hljs-subst) { color: #cfb2ee; }
+.markdown-body blockquote { margin-inline: 0; padding: .15em 1em; border-inline-start: 3px solid var(--decoration); background: var(--soft); }
+.markdown-body img { max-width: 100%; height: auto; }
+.markdown-body hr { border: 0; border-top: 1px solid var(--border); }
+.markdown-table { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; margin-block: 1em; }
+.markdown-table table { width: 100%; min-width: 420px; border-collapse: collapse; font-size: .92em; }
+.markdown-table :is(th, td) { padding: .55em .8em; text-align: start; vertical-align: top; }
+.markdown-table th { background: var(--soft); color: var(--text); }
+.markdown-table td { border-top: 1px solid var(--border); }
 
 @media(min-width:1600px) { .shell { max-width: 1280px; } }
 @media(max-width:900px) {
@@ -348,3 +381,5 @@ footer { display: flex; align-items: center; justify-content: space-between; gap
 
 .card>h3 { margin-top: 0; }
 .document-day-card .document-row:first-child { padding-top: 0; }
+
+/* Journal navigation sits above the site header. */
