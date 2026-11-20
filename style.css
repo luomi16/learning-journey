@@ -140,6 +140,26 @@ nav a:hover { color: var(--accent); }
 .journal-heading h2 { font-size: 18px; font-weight: 600; margin: 0; }
 .journal-heading h2 span { margin-left: 10px; color: var(--muted); font-size: 13px; font-weight: 400; }
 .journal-heading>span { font-size: 12px; color: var(--muted); }
+.journal-layout { display: grid; grid-template-columns: minmax(0, 1fr) 236px; gap: 30px; align-items: start; }
+.study-sidebar { position: sticky; top: 24px; display: grid; gap: 18px; }
+.sidebar-card { border: 1px solid var(--border); border-radius: 14px; padding: 19px 18px; background: var(--surface); box-shadow: var(--shadow); }
+.sidebar-card h2 { margin: 0 0 15px; color: var(--text); font: 600 20px/1.2 Georgia, serif; }
+.sidebar-card h2 span { color: #a6a29c; font: 400 19px/1 'DM Sans', sans-serif; margin-right: 6px; }
+.sidebar-card h2 i { color: var(--accent); font: 400 16px/1 Georgia, serif; font-style: normal; }
+.todo-card { background: var(--surface); }
+.reminders-card { background: var(--soft); border-color: transparent; }
+.todo-list, .reminder-list { list-style: none; padding: 0; margin: 0; }
+.todo-list li, .reminder-list li { display: flex; align-items: baseline; justify-content: space-between; gap: 9px; padding: 9px 0; color: var(--body-text); font-size: 12px; line-height: 1.45; }
+.todo-list label { display: flex; align-items: center; gap: 8px; min-width: 0; cursor: pointer; }
+.todo-list label span, .reminder-list li > span { min-width: 0; }
+.todo-list input { appearance: none; flex: 0 0 15px; width: 15px; height: 15px; margin: 0; border: 1.5px solid var(--muted); border-radius: 2px; background: var(--surface); }
+.todo-list input:checked { border-color: var(--accent); background: var(--accent); }
+.todo-list input:checked::after { content: '✓'; display: block; color: white; font-size: 11px; line-height: 13px; text-align: center; }
+.todo-list input:checked + span { color: var(--muted); text-decoration: line-through; }
+.sidebar-card time { flex: 0 0 auto; color: #a6a29c; font-size: 10px; white-space: nowrap; }
+.reminder-list { border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent); }
+.reminder-list li::before { content: '•'; color: var(--accent); margin-right: -2px; }
+.reminder-list li > span { margin-right: auto; }
 .entry { display: grid; grid-template-columns: 80px 37px minmax(0, 1fr); }
 .date { padding-top: 25px; color: var(--muted); font-size: 11px; letter-spacing: 1px; }
 .date strong { display: block; font: 500 32px/1.25 'Manrope', sans-serif; letter-spacing: -1px; color: var(--text); }
@@ -213,6 +233,8 @@ footer { border-top: 1px solid var(--border); padding: 25px 0 32px; font-size: 1
     .search { width: 100%; }
     .entry { grid-template-columns: 65px 25px minmax(0, 1fr); }
     .card { padding: 22px 23px 0; }
+    .journal-layout { grid-template-columns: minmax(0, 1fr); }
+    .study-sidebar { position: static; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media(max-width:600px) {
     .shell { padding: 0 18px; }
@@ -230,6 +252,8 @@ footer { border-top: 1px solid var(--border); padding: 25px 0 32px; font-size: 1
     .journal-heading h2 { font-size: 16px; }
     .journal-heading h2 span { margin-left: 6px; font-size: 12px; }
     .journal-heading>span { font-size: 10px; text-align: right; }
+    .study-sidebar { grid-template-columns: 1fr; gap: 13px; }
+    .sidebar-card { border-radius: 12px; padding: 17px; }
     .entry { grid-template-columns: 35px 17px minmax(0, 1fr); }
     .date { font-size: 9px; letter-spacing: 0; }
     .date strong { font-size: 25px; }

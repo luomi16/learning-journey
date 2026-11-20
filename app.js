@@ -6,6 +6,11 @@ $('#theme').onclick = () => {
     document.documentElement.dataset.theme = next;
     try { localStorage.setItem('journey-theme', next); } catch {}
 };
+document.querySelectorAll('[data-task]').forEach(task => {
+    const key = `journey-task-${task.dataset.task}`;
+    try { task.checked = localStorage.getItem(key) === 'true'; } catch {}
+    task.addEventListener('change', () => { try { localStorage.setItem(key, String(task.checked)); } catch {} });
+});
 if ($('#timeline')) {
     const views = {
         timeline: { title: 'The learning log', placeholder: 'Search logs…', unit: 'day' },
