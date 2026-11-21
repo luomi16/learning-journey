@@ -96,3 +96,7 @@ For a repository named `OWNER.github.io`, the site is served at the account's ro
 Builds give CSS, JavaScript, and journal data content-based filenames, so updates do not reuse a previous version from the browser cache. If an older tab still looks out of date after deployment, hard-refresh it once.
 
 Google Fonts are optional: the page uses system fonts when they cannot load. Content is public when you publish the site; there is no login or database.
+
+## 网页编辑
+
+支持右上角进入 Markdown 编辑模式、本地每分钟保存草稿、GitHub 登录提交及自动发布状态。需要单独部署编辑服务并配置 OAuth；步骤见 [editor/README.md](editor/README.md)。

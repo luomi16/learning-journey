@@ -1,0 +1,20 @@
+.editor-shell { max-width: 1500px; margin: auto; padding: 24px; }
+header { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+header h1 { margin-right: auto; font-size: 24px; }
+button, select { padding: 8px 12px; border: 1px solid var(--border); background: var(--soft); color: var(--text); border-radius: 6px; }
+a { color: var(--accent); text-decoration: underline; }
+.panes { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 18px 0; }
+.panes > section { min-width: 0; }
+h2 { font-size: 17px; }
+textarea { width: 100%; min-height: 65vh; resize: vertical; padding: 16px; font: 14px/1.65 ui-monospace, monospace; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 8px; tab-size: 4; }
+#preview { margin-top: 0; max-height: 75vh; overflow: auto; }
+pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: 16px; max-height: 450px; overflow: auto; }
+#before { background: #fff0f0; color: #782c2c; }
+#after { background: #eef9ee; color: #225c31; }
+button:disabled { opacity: .5; cursor: wait; }
+[hidden] { display: none !important; }
+@media(max-width:800px) { .panes { grid-template-columns: 1fr; } .editor-shell { padding: 14px; } }
+
+.metadata { display: flex; flex-wrap: wrap; gap: 16px; }
+.metadata label { display: grid; gap: 5px; flex: 1; }
+.metadata input { min-width: 160px; padding: 8px; border: 1px solid var(--border); border-radius: 6px; }

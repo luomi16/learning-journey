@@ -18,8 +18,8 @@ async function fixture(t) {
     await writeFile(join(directory, 'knowledge/concept.md'), '---\ntitle: Concept\n---\n## Definition\nAn explanation.');
     return directory;
 }
-function build(directory) {
-    execFileSync(process.execPath, [buildScript], { cwd: directory, stdio: 'pipe' });
+function build(directory, env = process.env) {
+    execFileSync(process.execPath, [buildScript], { cwd: directory, env, stdio: 'pipe' });
 }
 async function assets(directory) {
     const files = await readdir(join(directory, 'dist'));
@@ -75,4 +75,16 @@ test('data-only and CSS-only changes invalidate the right URLs and remove obsole
     for (const page of ['index.html', 'notes/detail.html', 'knowledge/concept.html']) {
         assert((await readFile(join(directory, 'dist', page), 'utf8')).includes(afterStyle.style));
     }
+});
+
+
+test('editor links use configured service and the current source path', async t => {
+    const directory = await fixture(t);
+    build(directory, { ...process.env, EDITOR_URL: 'https://editor.example.com' });
+    const index = await readFile(join(directory, 'dist/index.html'), 'utf8');
+    const note = await readFile(join(directory, 'dist/notes/detail.html'), 'utf8');
+    assert(index.includes('href="https://editor.example.com/?path="'));
+    assert(note.includes('href="https://editor.example.com/?path=notes%2Fdetail.md"'));
+    build(directory, { ...process.env, EDITOR_URL: '' });
+    assert((await readFile(join(directory, 'dist/index.html'), 'utf8')).includes('class="edit-link" disabled'));
 });

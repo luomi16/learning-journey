@@ -196,9 +196,16 @@ const appAsset = await fingerprint('app.js', appSource);
 const styleAsset = await fingerprint('style.css', await readFile('style.css', 'utf8'));
 // Keep the previous URLs working for tabs that still have an older HTML page.
 await writeFile('dist/app.js', appSource);
+const editorOrigin = process.env.EDITOR_URL ? new URL(process.env.EDITOR_URL).origin : '';
+if (editorOrigin && !editorOrigin.startsWith('https://') && !/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(editorOrigin)) throw new Error('EDITOR_URL must use HTTPS');
 const pages = ['dist/index.html', ...notes.map(document => `dist/notes/${document.slug}.html`), ...concepts.map(document => `dist/knowledge/${document.slug}.html`)];
 for (const page of pages) {
+    const sourcePath = page === 'dist/index.html' ? '' : page.replace(/^dist\//, '').replace(/\.html$/, '.md');
+    const editControl = editorOrigin
+        ? `<a class="edit-link" href="${escape(editorOrigin)}/?path=${encodeURIComponent(sourcePath)}">编辑</a>`
+        : '<button class="edit-link" disabled title="请先配置编辑服务 EDITOR_URL">编辑</button>';
     const html = (await readFile(page, 'utf8'))
+        .replace('<button id="theme"', `${editControl}<button id="theme"`)
         .replace(/(href=["'](?:\.\/|\.\.\/))style\.css(["'])/g, `$1${styleAsset}$2`)
         .replace(/(src=["'](?:\.\/|\.\.\/))app\.js(["'])/g, `$1${appAsset}$2`);
     await writeFile(page, html);

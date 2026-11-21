@@ -383,3 +383,7 @@ footer { display: flex; align-items: center; justify-content: space-between; gap
 .document-day-card .document-row:first-child { padding-top: 0; }
 
 /* Journal navigation sits above the site header. */
+
+.edit-link { border: 1px solid var(--border); background: var(--soft); color: var(--accent); border-radius: 8px; padding: 7px 12px; font-size: 13px; white-space: nowrap; }
+.edit-link:disabled { opacity: .55; cursor: default; }
+.topbar > .edit-link { margin-left: auto; }

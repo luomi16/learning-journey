@@ -3,7 +3,6 @@ title: Forward Propagation / Backward Propagation
 date: 2026-11-18
 tag: Learning
 ---
-## Core idea
 
 **Forward propagation**: data is computed layer by layer from the input to the output.
 

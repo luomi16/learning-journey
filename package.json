@@ -5,7 +5,8 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "dev": "npm run build && python3 -m http.server 4173 --directory dist",
-    "test": "node --test scripts/build.test.mjs"
+    "test": "node --test scripts/*.test.mjs editor/*.test.mjs",
+    "editor": "node --env-file=.env editor/server.mjs"
   },
   "dependencies": {
     "highlight.js": "^11.12.0",
