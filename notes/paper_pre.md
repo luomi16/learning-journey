@@ -1,3 +1,8 @@
+---
+title: Edge LLM inference ideas
+---
+
+
 Model partitioning and computation allocation for low-latency LLM inference across multiple edge devices
 
 Problem:
