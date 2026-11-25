@@ -22,6 +22,19 @@ Input length + expected output length + device memory
 → Allocate disjoint device sets to encoder and decoder
 → Execute inference using the selected plan
 
+LLMEdger 怎样结合它们？
+
+例如用 4 台设备执行 12 层模型：
+```
+阶段 1：第 1–6 层          阶段 2：第 7–12 层
+┌─────────────────┐       ┌─────────────────┐
+│ A、B 做张量并行   │ ───→  │ C、D 做张量并行   │
+└─────────────────┘       └─────────────────┘
+          TP                       TP
+             两个阶段之间使用 PP
+```
+这是 PP=2、每阶段 TP=2 的混合并行示例。
+
 ## Goal
 在设备内存约束下，为输入处理和输出生成选择合适的模型并行方案，
 尽量缩短单个请求的端到端推理时间。
@@ -38,9 +51,15 @@ Input length + expected output length + device memory
 - Pipeline Parallelism (PP)：按连续层划分模型，不同设备负责不同层块。
 - Tensor Parallelism (TP)：把同一层的计算拆给多台设备共同完成。
 - Hybrid Parallelism (PP×TP)：按层划分阶段，并在阶段内部使用 TP。
+- 离线性能测量（Profiling）	
+- 动态规划（DP）dynamic programming
 
 ## Limitations
 - 依赖离线性能测量和预计输出长度。
 - 动态规划复杂度随设备数量呈指数增长。
 - 主要在 T5 模型和模拟边缘环境中验证。
 - 设备更多不一定更快，通信开销可能抵消计算收益。
+
+# Tech
+PP - pipeline-parallel
+TP - tensor-parallel
