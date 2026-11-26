@@ -217,7 +217,7 @@ nav a:hover { color: var(--accent); }
 .empty { padding: 50px 20px; text-align: center; border: 1px dashed var(--border); border-radius: 10px; color: var(--muted); }
 .empty button { background: var(--pink); border: 0; border-radius: 8px; padding: 8px 15px; color: var(--text); }
 footer { border-top: 1px solid var(--border); padding: 25px 0 32px; font-size: 11px; color: var(--muted); }
-.reading-note { max-width: 780px; margin: 42px auto 70px; }
+.reading-note { max-width: 1120px; margin: 42px auto 70px; }
 .reading-note h1 { font: 600 clamp(26px, 4vw, 38px)/1.4 'Manrope', sans-serif; letter-spacing: -1px; margin: 10px 0 16px; overflow-wrap: anywhere; }
 .note-date { font-size: 13px; color: var(--muted); }
 .paper-link { color: var(--accent); text-decoration: underline; text-underline-offset: 4px; }
@@ -256,7 +256,9 @@ footer { border-top: 1px solid var(--border); padding: 25px 0 32px; font-size: 1
 .markdown-body hr { border: 0; border-top: 1px solid var(--border); }
 .markdown-table { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; margin-block: 1em; }
 .markdown-table table { width: 100%; min-width: 420px; border-collapse: collapse; font-size: .92em; }
-.markdown-table :is(th, td) { padding: .55em .8em; text-align: start; vertical-align: top; }
+.markdown-table table:has(thead th:nth-child(3):last-child) { min-width: 640px; table-layout: fixed; }
+.markdown-table table:has(thead th:nth-child(3):last-child) th:first-child { width: 9rem; }
+.markdown-table :is(th, td) { padding: .65em .9em; text-align: start; vertical-align: top; line-height: 1.6; overflow-wrap: break-word; }
 .markdown-table th { background: var(--soft); color: var(--text); }
 .markdown-table td { border-top: 1px solid var(--border); }
 

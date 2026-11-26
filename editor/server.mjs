@@ -6,16 +6,13 @@ import { join } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
-import MarkdownIt from 'markdown-it';
-import hljs from 'highlight.js/lib/core';
-import python from 'highlight.js/lib/languages/python';
+import { createMarkdown } from '../scripts/markdown.mjs';
 const run = promisify(execFile);
 const root = fileURLToPath(new URL('../', import.meta.url));
 export const validPath = path => /^(content|notes|knowledge)\/[A-Za-z0-9_-]+\.md$/.test(path);
 const id = () => randomBytes(32).toString('hex');
 const fail = (status, message) => Object.assign(new Error(message), { status });
-hljs.registerLanguage('python', python);
-const markdown = new MarkdownIt({ highlight: (code, lang) => ['python', 'py', 'python3'].includes(lang.toLowerCase()) ? hljs.highlight(code, { language: 'python' }).value : '' });
+const markdown = createMarkdown();
 export function createEditor(config, fetcher = fetch) {
     const origin = new URL(config.origin).origin;
     const sessions = new Map(), pending = new Map();

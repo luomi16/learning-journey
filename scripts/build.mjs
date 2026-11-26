@@ -1,8 +1,6 @@
 import { createHash } from 'node:crypto';
-import MarkdownIt from 'markdown-it';
-import hljs from 'highlight.js/lib/core';
-import python from 'highlight.js/lib/languages/python';
 import { readdir, readFile, mkdir, copyFile, writeFile, unlink } from 'node:fs/promises';
+import { createMarkdown } from './markdown.mjs';
 const escape = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 async function load(directory) {
     const files = await readdir(directory).catch(error => { if (error.code === 'ENOENT') return []; throw error; });
@@ -34,13 +32,7 @@ for (const document of [...notes, ...concepts]) {
 }
 // Daily entries stay on the Timeline. Only files in notes/ create standalone Notes pages.
 const targets = new Set([...notes.map(note => `notes/${note.slug}`), ...concepts.map(e => `knowledge/${e.slug}`)]);
-hljs.registerLanguage('python', python);
-const markdown = new MarkdownIt({
-    highlight(code, language) {
-        if (!['python', 'py', 'python3'].includes(language.toLowerCase())) return '';
-        return hljs.highlight(code, { language: 'python' }).value;
-    }
-});
+const markdown = createMarkdown();
 markdown.renderer.rules.link_open = (tokens, index, options, env, renderer) => {
     const link = tokens[index];
     const href = link.attrGet('href');
@@ -56,8 +48,6 @@ markdown.renderer.rules.link_open = (tokens, index, options, env, renderer) => {
     }
     return renderer.renderToken(tokens, index, options);
 };
-markdown.renderer.rules.table_open = () => '<div class="markdown-table" tabindex="0" role="region" aria-label="Table"><table>';
-markdown.renderer.rules.table_close = () => '</table></div>\n';
 function inline(text, prefix = '.', labelLinkedPages = false) {
     // Treat code as literal text so instructional link examples do not become links.
     return escape(text).replace(/`([^`]+)`|\[([^\]]+)\]\(([^\s)]+)\)|\*\*([^*]+)\*\*/g, (_, code, label, escapedUrl, bold) => {
