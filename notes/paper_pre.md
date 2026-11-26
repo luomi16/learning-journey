@@ -2,18 +2,18 @@
 title: Edge LLM inference ideas
 ---
 
-
 ## Model partitioning and computation allocation for low-latency LLM inference across multiple edge devices
 
-## Problem:
+## Problem
+
 How can multiple resource-constrained devices collaboratively run an LLM efficiently?
 
 ## Comparison
 | Aspect | LLMEdger | EdgeShard |
 |---|---|---|
 | **Objectives** |	 Minimize single-request end-to-end latency | Separate optimization of latency and throughput |
-| **Problem focus** | phase-aware parallelism configuration | device selection and layer allocation with chosed LLM |
-| **Solution method** | Offline profiling + dynamic programming <br> Four steps: <br> 1. Profile the hardware. Measure how fast layer blocks run and memory needed at different tensor parallelism levels. <br> 2. Plan the encoder. For each possible device set, find the fastest layer split and worker assignment that fits in memory. <br> 3. Plan the decoder. Repeat the same search for the decoder. <br> 4. Pick the best split. Give one set of devices to the encoder and the rest to the decoder. Choose the split with the lowest combined latency. | Offline profiling + dynamic programming <br>Three steps: <br> 1. Measure the model(each layer's execution time, memeory requirement, and output size) and devices(device memory and network bandwidth) <br> 2.Compare possible placements ??? <br> 3. Use DP to build the assignment.(computer cost)	 |
+| **Problem focus** | Phase-aware layer partitioning, tensor parallelism, and device allocation for the encoder and decoder | Device selection and layer allocation for a chosen LLM |
+| **Solution method** | Offline profiling + dynamic programming <br> Four steps: <br> 1. Profile the hardware. Measure layer execution time and memory use across input lengths, output lengths, and tensor parallelism degrees. <br> 2. Plan the encoder. For each possible device set, find the fastest layer split and worker assignment that fits in memory. <br> 3. Plan the decoder. Repeat the same search for the decoder. <br> 4. Pick the best split. Give one set of devices to the encoder and the rest to the decoder. Choose the split with the lowest combined latency for the prompt and expected answer length. |                                                                        Offline profiling + dynamic programming <br> Three steps: <br> 1. Measure the model(each layer's execution time, memeory requirement, and output size) and devices(device memory and network bandwidth) <br> 2. Compare possible placements. Check that the layers fit in memory and estimate transfer time from activation size and link bandwidth. <br> 3. Use DP to build the assignment. Minimize total computation and communication time for latency, or minimize the time of the slowest pipeline stage for throughput. |                                                                              
 
 ## Paper 1 LLMEdger: Phase-Aware Model Parallelism Scheduler for LLM Inference on Edge
 LLMEdger considers that input processing and autoregressive generation have different computation–communication trade-offs. It selects layer partitions, tensor-parallel degrees, and device allocations for the encoder and decoder.
@@ -26,3 +26,6 @@ EdgeShard divides an LLM into layer-level shards and places them across selected
 It provides separate algorithms for minimizing sequential inference latency and improving pipeline throughput. Its main contribution is joint device selection and model partitioning, rather than assuming a fixed set of participating devices.
 
 ## Paper 3 Jupiter: Fast and Resource-Efficient Collaborative Inference of Generative LLMs on Edge Devices
+Jupiter uses dynamic programming to balance layer blocks across a given order of devices and choose prompt chunk sizes. During prefill, it overlaps chunks of one prompt across the pipeline. Each stage caches attention state from earlier chunks so later chunks can use their context.
+
+During decoding, lightweight prediction heads draft multiple candidate tokens for the full model to verify in one pass. Jupiter can also generate an outline and expand its points in parallel. This optional step can reduce answer quality on tasks that require a chain of reasoning, such as math or coding.
